@@ -1,0 +1,9 @@
+pandas
+openpyxl
+selenium
+webdriver-manager
+sentence-transformers
+sentence_splitter
+torch
+ollama
+
