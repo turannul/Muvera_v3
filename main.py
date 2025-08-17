@@ -77,7 +77,14 @@ if not os.path.exists(f"{output_dir}/title_description_kendi_uyumu.csv"):
 
 
 # ---- 9) Sorgu benzerlik skoru hesaplama ----
-if not os.path.exists(f"{output_dir}/icerik_sorgu_top{TOP_K}.csv"):
+if (f"{output_dir}/icerik_sorgu_top{TOP_K}.csv"):
     print("\n📈 Sorgu benzerlik skorları sıralanıyor...")
     sort_query_similarity()
+    print(f"✅ {OUT_CSV} yazıldı.")
+
+# ---- 10) Niyet benzerlik skoru hesaplama ----
+if (f"{output_dir}/icerik_niyet_top{TOP_K}.csv"):
+    print("\n📈 Niyet benzerlik skorları sıralanıyor...")
+    from modules.niyet import sort_intent_similarity
+    sort_intent_similarity()
     print(f"✅ {OUT_CSV} yazıldı.")

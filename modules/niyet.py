@@ -25,7 +25,7 @@ def sort_intent_similarity():
         raise KeyError("Beklenen kolon yok: 'Benzerlik Skoru'")
     
     df["Benzerlik Skoru"] = df["Benzerlik Skoru"].apply(norm)
-    need = {"HTML Bölümü", "İçerik", "Kullanıcı Niyeti", "Benzerlik Skoru"}
+    need = {"HTML Kaynağı", "Web İçeriği", "Kullanıcı Niyeti", "Benzerlik Skoru"}
     miss = need - set(df.columns)
     if miss:
         raise KeyError(f"Eksik kolon(lar): {miss}")
