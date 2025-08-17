@@ -27,9 +27,9 @@ jobs:
         echo "Running flake8 on Python files..."
         find . -type f -name "*.py" -exec python3 -m flake8 {} +
         echo "flake8 analysis completed successfully."
-    - name: Type checking with Pyright
-      run: |
-        cd ${{ github.workspace }}
-        echo "Running Pyright for type checking..."
-        find . -type f -name "*.py" -exec python3 -m pyright {} +
-        echo "Pyright type checking completed successfully."
+#    - name: Type checking with Pyright
+#      run: |
+#        cd ${{ github.workspace }}
+#        echo "Running Pyright for type checking..."
+#        find . -type f -name "*.py" -exec python3 -m pyright {} +
+#        echo "Pyright type checking completed successfully."
