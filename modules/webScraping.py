@@ -1,11 +1,12 @@
 import logging
+import time
+from urllib.parse import urljoin, urlparse
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from urllib.parse import urlparse, urljoin
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 
 # LOGGING AYARI
 logging.basicConfig(

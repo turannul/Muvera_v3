@@ -1,6 +1,7 @@
 import os
-from sentence_transformers import SentenceTransformer
+
 import ollama
+from sentence_transformers import SentenceTransformer
 
 input_dir = os.path.join("data", "input")
 output_dir = os.path.join("data", "output")

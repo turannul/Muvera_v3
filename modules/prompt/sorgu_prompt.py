@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+
 def generate_sorgu_prompt(kullanici_sorgusu: str, mevcut_icerik: str, html_bolumu: str, eski_skor: float) -> str:
     """
     LLM'ye, metni küçük dokunuşlarla geliştirmesi için net talimat verir.

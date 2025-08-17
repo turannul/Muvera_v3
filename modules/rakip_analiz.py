@@ -1,12 +1,19 @@
 # rakip_analiz.py — sorgu-merkezli rakip analizi (interactive query, no 'uyum_durumu')
 from __future__ import annotations
 
-import os, sys, re, json, glob, argparse, unicodedata
+import argparse
+import glob
+import json
+import os
+import re
+import sys
+import unicodedata
 from pathlib import Path
+
 import pandas as pd
-from sentence_transformers import SentenceTransformer, util
-from playwright.sync_api import sync_playwright
 from lxml import html as lxml_html
+from playwright.sync_api import sync_playwright
+from sentence_transformers import SentenceTransformer, util
 
 # ------------------- Konfig / yollar -------------------
 try:

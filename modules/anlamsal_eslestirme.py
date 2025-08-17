@@ -1,10 +1,12 @@
-import torch
-import pandas as pd
-from modules.kullanici_sorgusu import sorgular
-from sentence_transformers import util
-from sentence_splitter import SentenceSplitter
 from itertools import chain
+
+import pandas as pd
+import torch
+from sentence_splitter import SentenceSplitter
+from sentence_transformers import util
+
 from config import model
+from modules.kullanici_sorgusu import sorgular
 
 # Türkçe için cümle ayırıcı
 splitter = SentenceSplitter(language='tr')

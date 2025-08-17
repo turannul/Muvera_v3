@@ -2,7 +2,9 @@
 import os
 import re
 import unicodedata
+
 import pandas as pd
+
 from config import output_dir
 
 TOP_K   = 10

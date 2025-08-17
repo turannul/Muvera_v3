@@ -1,8 +1,9 @@
+import re
+import time
+
+import openpyxl
 import pandas as pd
 from serpapi import GoogleSearch  # Doğru import
-import time
-import openpyxl
-import re
 
 # =============== AYARLAR ===============
 API_KEY = "26cb0c0c44cbb5ef59f4a9daadd6d9169243c1c8efccca9121020f2e09003447"  # API anahtarınızı buraya yazın

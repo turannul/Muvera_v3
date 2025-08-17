@@ -1,9 +1,11 @@
 # modules/intent_classifier.py (öneri)
 
-from ollama import Client
 import pandas as pd
+from ollama import Client
+
+from config import ollama_client, output_dir
 from modules.kullanici_sorgusu import sorgular
-from config import output_dir, ollama_client
+
 
 def niyet_belirle(sorgu: str) -> str:
     prompt = f'''

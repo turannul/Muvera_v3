@@ -1,5 +1,6 @@
 # modules/niyet.py (veya verdiğin dosyada aynen değiştir)
 import pandas as pd
+
 from config import output_dir
 
 IN_CSV  = f"{output_dir}/html_icerik_niyet_uyumu.csv"

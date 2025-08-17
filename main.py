@@ -1,18 +1,13 @@
 import os
+import re
 
-from modules.anlamsal_eslestirme import (
-    anlamsal_eslestirme,
-    tam_niyet_uyum_tablosu,
-    tam_sorgu_uyum_tablosu,
-    title_description_uyumu,
-    title_description_birbirine_uyum,
-)
+from config import output_dir
+from modules.anlamsal_eslestirme import (anlamsal_eslestirme, tam_niyet_uyum_tablosu, tam_sorgu_uyum_tablosu, title_description_birbirine_uyum, title_description_uyumu)
 from modules.intent_classifier import niyet_belirle
 from modules.kullanici_sorgusu import sorgular
+from modules.sorgu import OUT_CSV, TOP_K, sort_query_similarity
 from modules.webScraping import get_structured_web_content_selenium
-import re, pandas
-from config import output_dir
-from modules.sorgu import sort_query_similarity, TOP_K, OUT_CSV
+
 
 def temizle_niyet(text: str) -> str:
     if not text:
@@ -88,3 +83,5 @@ if (f"{output_dir}/icerik_niyet_top{TOP_K}.csv"):
     from modules.niyet import sort_intent_similarity
     sort_intent_similarity()
     print(f"✅ {OUT_CSV} yazıldı.")
+
+
