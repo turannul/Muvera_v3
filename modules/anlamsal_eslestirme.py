@@ -113,7 +113,7 @@ def tam_niyet_uyum_tablosu(content, niyet_listesi: list):
     return df
 
 # ✅ 4. Başlık ve açıklama ile sorguların anlamsal uyumu
-def title_description_uyumu(content: dict, sorgular: list):
+def title_description_uyumu(content: dict, sorgular: list) -> pd.DataFrame:
     baslik = content.get("title", "")
     aciklama = content.get("meta_description", "")
 
@@ -139,7 +139,7 @@ def title_description_uyumu(content: dict, sorgular: list):
 
 
 # ✅ Başlık ve açıklama arasında benzerlik skoru hesaplayan fonksiyon
-def title_description_birbirine_uyum(content: dict):
+def title_description_birbirine_uyum(content: dict) -> pd.DataFrame:
     title = content.get("title", "").strip()
     description = content.get("meta_description", "").strip()
 
@@ -152,11 +152,10 @@ def title_description_birbirine_uyum(content: dict):
 
     title_vec = model.encode(title, convert_to_tensor=True)
     desc_vec = model.encode(description, convert_to_tensor=True)
-
     skor = util.cos_sim(title_vec, desc_vec)[0][0].item()
 
     return pd.DataFrame([{
         "title": title,
         "meta_description": description,
-        "Benzerlik Skoru": round(skor, 4)
-,    }])
+        "Benzerlik Skoru": round(skor, 4),
+    }])

@@ -1,2 +1,10 @@
 /home/kitana/anaconda3/lib/python3.13/site-packages/openpyxl/styles/stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
   warn("Workbook contains no default style, apply openpyxl's default")
+
+sorgu ve niyet .py dosyalarımız şu an her sorgu ve niyet için 10 ar tane alıyor.yani ortlama 
+70-80er tane oluşturuyor.Sonrasında yine bu dosyaların içinde html,web içeriği,sorgu,benzerlik skoru kısımlarını
+
+html bölümü,sorgu,mevcut içerik(web içeriği),geliştirilmiş metin,eski skor(benzerlik skoru),yüzde değişimi (İÇERİK SORGU UYUMU İYLEŞTİRME)
+
+html bölümü,kullanıcı niyeti,mevcut içerik(web içeriği),geliştirilmiş metin,eski skor(benzerlik skoru),yüzde değişimi (NİYET SORGU UYUMU İYLEŞTİRME)
+
