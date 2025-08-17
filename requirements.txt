@@ -6,4 +6,8 @@ sentence-transformers
 sentence_splitter
 torch
 ollama
-
+langchain-core
+lxml
+playwright
+playwright-stealth
+serpapi
