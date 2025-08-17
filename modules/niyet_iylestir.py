@@ -1,14 +1,14 @@
-# modules/niyet_iylestir.py — verbose with timings (no argparse, no env)
+# modules/niyet_iylestir.py — verbose + clamp non-improvements to 0% change
 from __future__ import annotations
-import os, json, re, time, math
+import os, json, re, time
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
 # ============== CONFIG (edit here) ==============
 MODE = "niyet"                     # "niyet" | "sorgu" | "both"
-MIN_IMPROVE = 0.005
-MAX_ATTEMPTS = 1
-ONLY_IMPROVED = False
+MIN_IMPROVE = 0.0003               # ~0.03% absolute relative improvement
+MAX_ATTEMPTS = 3                   # try up to N; if not improved, add anyway with 0% change
+ONLY_IMPROVED = False              # do NOT skip non-improved rows
 OLLAMA_MODEL = "gemma3:4b"
 # ===============================================
 
@@ -31,28 +31,17 @@ try:
 except Exception:
     st_model = SentenceTransformer("emrecan/bert-base-turkish-cased-mean-nli-stsb-tr")
 
-# ---- optional prompts ----
-try:
-    from modules.prompt.niyet_prompt import generate_niyet_prompt as _gen_niyet_prompt
-except Exception:
-    _gen_niyet_prompt = None
-try:
-    from modules.prompt.sorgu_prompt import generate_sorgu_prompt as _gen_sorgu_prompt
-except Exception:
-    _gen_sorgu_prompt = None
+from modules.prompt.niyet_prompt import generate_niyet_prompt as _gen_niyet_prompt
+from modules.prompt.sorgu_prompt import generate_sorgu_prompt as _gen_sorgu_prompt
 
 # ============== UTIL ==============
 def now() -> str:
-    t = time.localtime()
-    return time.strftime("%H:%M:%S", t)
+    return time.strftime("%H:%M:%S", time.localtime())
 
 def fmt_sec(s: float) -> str:
-    if s < 1:
-        return f"{s*1000:.0f} ms"
+    if s < 1: return f"{s*1000:.0f} ms"
     m, r = divmod(s, 60)
-    if m < 1:
-        return f"{s:.2f} s"
-    return f"{int(m)}m {r:.1f}s"
+    return f"{int(m)}m {r:.1f}s" if m >= 1 else f"{s:.2f} s"
 
 def _read_csv_robust(path: str) -> pd.DataFrame:
     t0 = time.time()
@@ -78,7 +67,7 @@ def _pick_col(df: pd.DataFrame, names):
     return None
 
 def _norm_score(x) -> float:
-    s = str(x if x is not None else "").replace("%", "").replace(",", ".").strip()
+    s = str(x if x is not None else "").replace("%","").replace(",",".").strip()
     m = re.findall(r"[-+]?\d*\.?\d+", s)
     if not m: return 0.0
     v = float(m[0])
@@ -87,16 +76,16 @@ def _norm_score(x) -> float:
 def _similarity(a_text: str, b_text: str) -> float:
     if not a_text or not b_text: return 0.0
     a = st_model.encode(a_text, convert_to_tensor=True, normalize_embeddings=True)
-    b = st_model.encode(b_text,  convert_to_tensor=True, normalize_embeddings=True)
+    b = st_model.encode(b_text, convert_to_tensor=True, normalize_embeddings=True)
     return float(util.cos_sim(a, b).item())
 
 def _run_llm(prompt: str) -> str:
     from ollama import chat
     t0 = time.time()
-    print(f"    [{now()}] 🔁 LLM call → {OLLAMA_MODEL} (prompt chars: {len(prompt)})", flush=True)
+    print(f"[{now()}] 🔁 LLM call → {OLLAMA_MODEL} (chars: {len(prompt)})", flush=True)
     resp = chat(model=OLLAMA_MODEL, messages=[{"role": "user", "content": prompt}])
     out = resp.get("message", {}).get("content", str(resp))
-    print(f"    [{now()}] ✅ LLM done in {fmt_sec(time.time()-t0)}", flush=True)
+    print(f"[{now()}] ✅ LLM done in {fmt_sec(time.time()-t0)}", flush=True)
     return out
 
 def _parse_llm_json(text: str) -> dict:
@@ -133,7 +122,7 @@ def _build_niyet_prompt(intent, current, tag, old):
             return _gen_niyet_prompt(intent, current, tag, old)
         except Exception:
             pass
-    return f"{NIYET_SYS}\n{NIYET_HUM.format(intent=intent, current=current, tag=tag, old=old)}"
+    return f"{NIYET_SYS}\n{NIYET_HUM}".format(intent=intent, current=current, tag=tag, old=old)
 
 def _build_sorgu_prompt(query, current, tag, old):
     if _gen_sorgu_prompt:
@@ -146,8 +135,7 @@ def _build_sorgu_prompt(query, current, tag, old):
            .replace("Geliştirilmiş İçerik", "Geliştirilmiş Metin")
 
 # ---- core improve ----
-def _try_improve(mode, query_text, current_text, html_tag, old_score,
-                 min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS):
+def _try_improve(mode, query_text, current_text, html_tag, old_score, min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS):
     best_text = current_text
     best_score = old_score if old_score > 0 else _similarity(query_text, current_text)
 
@@ -157,10 +145,8 @@ def _try_improve(mode, query_text, current_text, html_tag, old_score,
                  else _build_sorgu_prompt(query_text, best_text, html_tag, best_score)
         data = _parse_llm_json(_run_llm(prompt))
 
-        cand = (
-            data.get("Geliştirilmiş İçerik") if mode == "niyet"
-            else data.get("Geliştirilmiş Metin")
-        )
+        cand = (data.get("Geliştirilmiş İçerik") if mode == "niyet"
+                else data.get("Geliştirilmiş Metin"))
         if not isinstance(cand, str) or not cand.strip():
             print("    ↪️  LLM returned empty candidate; keeping current text", flush=True)
             cand = best_text
@@ -169,14 +155,14 @@ def _try_improve(mode, query_text, current_text, html_tag, old_score,
         print(f"    [{now()}] scored new={new_score:.4f} (delta={(new_score-best_score):+.4f})", flush=True)
 
         if new_score >= best_score * (1.0 + min_improve):
-            print(f"    🎯 improved ≥ {min_improve*100:.2f}% — accepting", flush=True)
+            print(f"    🎯 improved ≥ {min_improve*100:.3f}% — accepting", flush=True)
             return cand, new_score
 
         if new_score > best_score:
-            print("    ⬆️  slight improvement; updating baseline and retrying (if attempts left)", flush=True)
+            print("    ⬆️  slight improvement; updating baseline and retrying", flush=True)
             best_text, best_score = cand, new_score
 
-    print("    ⚖️  no sufficient improvement; returning best so far", flush=True)
+    print("⚖️  no sufficient improvement; returning best so far", flush=True)
     return best_text, best_score
 
 # ============== FLOWS ==============
@@ -204,26 +190,26 @@ def run_niyet_flow(min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS, only_impr
         cur    = str(r[c_text] or "")
         old    = _norm_score(r[c_score]) if c_score else _similarity(intent, cur)
 
-        print(f"\n[{now()}] → Row {idx+1}/{total} | tag='{tag}' | old={old:.4f}", flush=True)
+        print(f"\n[{now()}] → Row {idx + 1}/{total} | tag='{tag}' | old={old:.4f}", flush=True)
         cand, new = _try_improve("niyet", intent, cur, tag, old, min_improve, max_attempts)
 
-        if only_improved and new < old * (1.0 + min_improve):
-            print(f"   ✖ not enough improvement ({((new-old)/max(old,1e-8))*100:.2f}%) — skipping", flush=True)
-        else:
-            improved += 1 if new > old else 0
-            kept += 1
-            change_pct = (new - old) / max(old, 1e-8) * 100.0
-            rows.append({
-                "Kullanıcı Niyeti": intent,
-                "Mevcut İçerik": cur,
-                "Geliştirilmiş İçerik": cand,
-                "HTML Bölümü": tag,
-                "Eski Skor": round(float(old), 6),
-                "Yeni Skor": round(float(new), 6),
-                "Yüzde Değişim": round(float(change_pct), 2),
-            })
-            print(f"   ✅ kept (Δ={change_pct:+.2f}%)", flush=True)
+        # always keep (ONLY_IMPROVED=False); clamp change% to 0 if not improved
+        improved_flag = new > old
+        improved += 1 if improved_flag else 0
+        kept += 1
+        change_pct = ((new - old) / max(old, 1e-8) * 100.0) if improved_flag else 0.0
 
+        rows.append({
+            "Kullanıcı Niyeti": intent,
+            "Mevcut İçerik": cur,
+            "Geliştirilmiş İçerik": cand,
+            "HTML Bölümü": tag,
+            "Eski Skor": round(float(old), 6),
+            "Yeni Skor": round(float(new), 6),
+            "Yüzde Değişim": round(float(change_pct), 2),
+        })
+        msg = "✅ kept (Δ=+{:.2f}%)".format(change_pct) if improved_flag else "✅ kept (no improvement; Δ=0.00%)"
+        print(f"   {msg}", flush=True)
         print(f"   ⏱ row time: {fmt_sec(time.time()-r_t0)}", flush=True)
 
     out_df = pd.DataFrame(rows)
@@ -256,26 +242,25 @@ def run_sorgu_flow(min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS, only_impr
         cur = str(r[c_text] or "")
         old = _norm_score(r[c_score]) if c_score else _similarity(q, cur)
 
-        print(f"\n[{now()}] → Row {idx+1}/{total} | tag='{tag}' | old={old:.4f}", flush=True)
+        print(f"\n[{now()}] → Row {idx + 1}/{total} | tag='{tag}' | old={old:.4f}", flush=True)
         cand, new = _try_improve("sorgu", q, cur, tag, old, min_improve, max_attempts)
 
-        if only_improved and new < old * (1.0 + min_improve):
-            print(f"   ✖ not enough improvement ({((new-old)/max(old,1e-8))*100:.2f}%) — skipping", flush=True)
-        else:
-            improved += 1 if new > old else 0
-            kept += 1
-            change_pct = (new - old) / max(old, 1e-8) * 100.0
-            rows.append({
-                "HTML Bölümü": tag,
-                "Kullanıcı Sorgusu": q,
-                "Eski Metin": cur,
-                "Geliştirilmiş Metin": cand,
-                "Eski Skor": round(float(old), 6),
-                "Yeni Skor": round(float(new), 6),
-                "Yüzde Değişim": round(float(change_pct), 2),
-            })
-            print(f"   ✅ kept (Δ={change_pct:+.2f}%)", flush=True)
+        improved_flag = new > old
+        improved += 1 if improved_flag else 0
+        kept += 1
+        change_pct = ((new - old) / max(old, 1e-8) * 100.0) if improved_flag else 0.0
 
+        rows.append({
+            "HTML Bölümü": tag,
+            "Kullanıcı Sorgusu": q,
+            "Eski Metin": cur,
+            "Geliştirilmiş Metin": cand,
+            "Eski Skor": round(float(old), 6),
+            "Yeni Skor": round(float(new), 6),
+            "Yüzde Değişim": round(float(change_pct), 2),
+        })
+        msg = "✅ kept (Δ=+{:.2f}%)".format(change_pct) if improved_flag else "✅ kept (no improvement; Δ=0.00%)"
+        print(f"   {msg}", flush=True)
         print(f"   ⏱ row time: {fmt_sec(time.time()-r_t0)}", flush=True)
 
     out_df = pd.DataFrame(rows)
@@ -284,7 +269,6 @@ def run_sorgu_flow(min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS, only_impr
     print(f"[{now()}] 🏁 SORGU flow finished in {fmt_sec(time.time()-t_flow)}\n", flush=True)
     return SORGU_OUT_CSV
 
-# ============== MAIN ==============
 def main():
     t_all = time.time()
     print(f"[{now()}] ⚙️  START niyet_iylestir.py", flush=True)
