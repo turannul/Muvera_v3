@@ -1,0 +1,120 @@
+{
+  "site": "https://reklamvermek.com/",
+  "query": "reklam ver",
+  "bizim_tahmini_sira": 3,
+  "uyumlu_kayit_sayisi": 10,
+  "uyumlu_kayitlar": [
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Reklam Vermek Olarak",
+      "benzerlik_skoru": 0.8315,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Google Ads reklamları aracılığıyla reklamlarınız Google'da arama sonuçlarında yayınlanır.",
+      "benzerlik_skoru": 0.5497,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Reklamveren Kılavuzu",
+      "benzerlik_skoru": 0.5432,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "lists",
+      "icerik": "Google Reklamları",
+      "benzerlik_skoru": 0.5367,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "X Reklamları",
+      "benzerlik_skoru": 0.5221,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Google reklamları direkt satış getiren, geri dönüşü kolayca ölçülebilen en iyi internet reklam aracıdır.",
+      "benzerlik_skoru": 0.4953,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Yandex Reklamları",
+      "benzerlik_skoru": 0.4845,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "paragraphs",
+      "icerik": "Google Ads ürününüz ya da hizmetiniz için hızlı ve basit bir reklam mecrasıdır.",
+      "benzerlik_skoru": 0.4766,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Twitter Reklamları",
+      "benzerlik_skoru": 0.4662,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    },
+    {
+      "html_bolumu": "div_texts",
+      "icerik": "Facebook Reklamları",
+      "benzerlik_skoru": 0.438,
+      "kaynak_dosya": "data/output/html_icerik_sorgu_uyumu.csv",
+      "kullanici_sorgusu": "reklam ver"
+    }
+  ],
+  "ustumuzde_olan_siteler": [
+    "https://business.google.com/tr/google-ads/",
+    "https://reklamver.com/"
+  ],
+  "rakip_sorgu_kullanimlari": [
+    {
+      "title": null,
+      "description": null,
+      "h1": null,
+      "eslesen_snippetler": [
+        {
+          "text": "Görüntülü Reklam Ağı",
+          "score": 0.5413
+        },
+        {
+          "text": "Google Ads, işletmeniz için ulaşmak istediğiniz hedeflere bağlı olarak kampanya türleri olarak da bilinen birçok reklam çözümü türü sunar:",
+          "score": 0.5154
+        },
+        {
+          "text": "Arama Görüntülü Reklam Alışveriş Video Uygulama",
+          "score": 0.485
+        }
+      ],
+      "url": "https://business.google.com/tr/google-ads/"
+    },
+    {
+      "title": "Reklam Ver | Anasayfa",
+      "description": "Reklam vermek isteyenlere Techpanel teknolojisi ile internet reklam paketi sunar. Şeffaf komisyon oranı ile çalışır. Sosyal Medya, SEO, Tasarım gibi ihtiyaçlarınızı da reklam hedef kitleniz için tek noktadan yönetir.",
+      "h1": null,
+      "eslesen_snippetler": [
+        {
+          "text": "Sınırsız Reklam Planı",
+          "score": 0.4349
+        },
+        {
+          "text": "Endüstride lider optimizasyon araçlarını kullanıyoruz. Google Reklam tekliflerinizi her 30 dakikada bir anlık verileriniz ile optimize ediyoruz. Üstelik Mobil tekliflerinizi sadece mobil siparişlere özel optimize ederek.",
+          "score": 0.3397
+        }
+      ],
+      "url": "https://reklamver.com/"
+    }
+  ]
+}

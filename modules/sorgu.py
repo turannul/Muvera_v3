@@ -84,9 +84,10 @@ def sort_query_similarity():
 
     # Skora göre sırala ve her Sorgu için Top-10 al
     topk = (df.sort_values([col_sorgu, "_score_num"], ascending=[True, False])
-              .groupby(col_sorgu, group_keys=True)
-              .head(TOP_K)
-              .reset_index(drop=True))
+                .groupby(col_sorgu, group_keys=True)
+                .head(TOP_K)
+                .reset_index(drop=True)
+            )
 
     # Çıkış DataFrame (HTML Kaynağı zorunlu kolon; yoksa boş doldur)
     out = pd.DataFrame()
