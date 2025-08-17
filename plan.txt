@@ -8,3 +8,25 @@ html bölümü,sorgu,mevcut içerik(web içeriği),geliştirilmiş metin,eski sk
 
 html bölümü,kullanıcı niyeti,mevcut içerik(web içeriği),geliştirilmiş metin,eski skor(benzerlik skoru),yüzde değişimi (NİYET SORGU UYUMU İYLEŞTİRME)
 
+
+
+
+the flow 
+  - Niyet prompt _top10 dosyalarından satırları al prompt olustur
+  - Run_llm Prompt"a gore yeni dosya olustur
+    - Sıde quest skor kontrolu
+      ! skor degısmıne ıyılesmedıgınde tekrar dene.
+    - Skor yuzde 3-5 arttıgında yenı dosya olustur.
+    * Yenı dosya da Mevcut satır benzerlık skoru eskı skor olarak yenıden adlandırılıcak
+    * Mevcut ıcerık yenıden degerlendırılıp yenı yeni skor olarak yeni sutun olusturulacak.
+    * Yeni vve eskı skorun farkı yuzdelık dilimde hesaplanıp yeni stunda yazılacak
+    * Bu ıcerık yenı dosya olarak kayıt edılecek
+    !!! Your mission is doing that real but before you need to know those rules and must follow...
+      - This project is must be modular layout shall not be changed keep ıt the way i designed.
+      - The iyilestir must handle both niyet and sorgu single file for bothç currently named niyet_iylestir.py on /Modules
+      The prompt generators are located in /Modules/prompt/{both here}
+
+
+    
+
+

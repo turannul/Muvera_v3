@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-def build_prompt(kullanici_sorgusu: str, mevcut_icerik: str, html_bolumu: str, eski_skor: float) -> str:
+def generate_sorgu_prompt(kullanici_sorgusu: str, mevcut_icerik: str, html_bolumu: str, eski_skor: float) -> str:
     """
     LLM'ye, metni küçük dokunuşlarla geliştirmesi için net talimat verir.
     Çıktı: yalnızca geçerli JSON.
@@ -26,7 +26,6 @@ def build_prompt(kullanici_sorgusu: str, mevcut_icerik: str, html_bolumu: str, e
         7) Kullanıcı sorgusundaki anahtar kelimeleri mutlaka geçirmelisin.
     """
 
-    # DİKKAT: JSON süslü parantezleri {{ }} ile kaçırıldı
     human_template = """
         Girdi:
         Kullanıcı Sorgusu: "{kullanici_sorgusu}"

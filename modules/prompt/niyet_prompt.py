@@ -1,6 +1,34 @@
 from langchain_core.prompts import ChatPromptTemplate
+try:
+    from config import output_dir
+except ImportError:
+    output_dir = "data/output"
+import os, pandas
 
-def build_prompt(kullanici_niyeti: str, mevcut_icerik: str, html_bolumu: str, eski_skor: float) -> str:
+niyet_top10_csv = os.path.join(output_dir, "icerik_niyet_top10.csv")
+def _parse_niyet_top10():
+    try:
+        df = pandas.read_csv(niyet_top10_csv)
+    except FileNotFoundError:
+        raise RuntimeError(f"[HATA] Niyet verisi dosyası bulunamadı: {niyet_top10_csv}")
+    col1 = df.columns[0]  # İlk kolon "Kullanıcı Niyeti"
+    col2 = df.columns[1]  # İkinci kolon "HTML Kaynağı"
+    col3 = df.columns[2]  # Üçüncü kolon "Web İçeriği"
+    col4 = df.columns[3]  # Dördüncü kolon "Benzerlik Skoru"
+    print(f"[INFO] Niyet verisi {len(df)} satır okundu")
+    print(f"[INFO] Niyet verisi kolonları: {col1}, {col2}, {col3}, {col4}")
+    return {row[col1]: (row[col2], row[col3], row[col4]) for _, row in df.iterrows()}
+
+
+def generate_niyet_prompt() -> str:
+    parsed_data: dict = _parse_niyet_top10()
+    kullanici_niyeti = parsed_data.get("Kullanıcı Niyeti")
+    html_bolumu = parsed_data.get("HTML Kaynağı", "")
+    mevcut_icerik = parsed_data.get("Web İçeriği", "")
+    eski_skor = parsed_data.get("Benzerlik Skoru", 0.0)
+
+    if not parsed_data:
+        raise ValueError("Niyet verisi boş veya okunamadı. Lütfen niyet_top10.csv dosyasını kontrol edin.")
     """
     LLM'ye, metni küçük dokunuşlarla geliştirmesi için net talimat verir.
     Hedef çıktı: JSON formatında eksiksiz döndürülmesi.
@@ -67,3 +95,7 @@ def build_prompt(kullanici_niyeti: str, mevcut_icerik: str, html_bolumu: str, es
     )
     
     return formatted_prompt
+
+if __name__ == "__main__":
+    generate_niyet_prompt()  # Test amaçlı çağrı
+    print("Niyet prompt oluşturuldu.")
