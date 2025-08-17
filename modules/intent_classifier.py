@@ -20,6 +20,7 @@ Nokta veya açıklama yazma.
     )
     return response['message']['content'].strip().lower()
 
+
 if __name__ == "__main__":
     # İsterseniz ayrı bir komutla sadece niyet temalarını üretirsiniz
     sonuclar = []

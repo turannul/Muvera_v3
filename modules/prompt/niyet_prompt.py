@@ -20,10 +20,11 @@ OUTPUT_KEYS = {
 }
 COLUMN_MAP = {
     "query": ["Kullanıcı Niyeti", "Kullanici Niyeti", "Niyet", "Intent"],
-    "html":  ["HTML Kaynağı", "HTML Kaynagi", "HTML Bölümü", "HTML Section"],
-    "text":  ["Web İçeriği", "Web Icerigi", "İçerik", "Icerik", "Metin", "Content"],
+    "html": ["HTML Kaynağı", "HTML Kaynagi", "HTML Bölümü", "HTML Section"],
+    "text": ["Web İçeriği", "Web Icerigi", "İçerik", "Icerik", "Metin", "Content"],
     "score": ["Benzerlik Skoru", "Skor", "Score", "Similarity Score", "similarity_score"]
 }
+
 
 # --- Yardımcılar ---
 def _read_top10() -> pd.DataFrame:
@@ -34,10 +35,12 @@ def _read_top10() -> pd.DataFrame:
         raise ValueError("En az 4 kolon bekleniyordu: Niyet, HTML, İçerik, Skor")
     return df
 
+
 def _cols(df: pd.DataFrame):
     # Eski tasarıma sadık: ilk 4 sütun
     c1, c2, c3, c4 = df.columns[:4]
     return {"query": c1, "html": c2, "text": c3, "score": c4}
+
 
 def _system_template() -> str:
     return """
@@ -47,9 +50,9 @@ Görevin, kullanıcı niyetine (intent) göre mevcut metni küçük dokunuşlarl
 Kurallar:
 1) Benzerlik skorunu artırmaya odaklan, anlamı bozma.
 2) HTML bölümüne göre:
-   - h1/h2: niyeti doğrudan karşılayan başlık üret (örn: "... nasıl" → "… Nasıl Yapılır?").
-   - p/div: Mevcut metni KORU, en fazla 5–10 kelime ekle.
-   - li: Mevcut metni KORU, en fazla 1–2 kelime ekle.
+    - h1/h2: niyeti doğrudan karşılayan başlık üret (örn: "... nasıl" → "… Nasıl Yapılır?").
+    - p/div: Mevcut metni KORU, en fazla 5–10 kelime ekle.
+    - li: Mevcut metni KORU, en fazla 1–2 kelime ekle.
 3) Uzunluk sınırları: p/div 5–10 kelime; li 1–2 kelime; h1/h2 kesme/özetleme yapma.
 4) Her zaman değiştir; rollback yok.
 5) Pazarlama/CTA klişeleri yok ("hedef kitlenize ulaşın", "kampanyanızı oluşturun" vb.).
@@ -57,6 +60,7 @@ Kurallar:
 7) Mevcut metin korunur; sadece küçük ekleme yapılır (kısaltma/özetleme YOK).
 8) Niyet doğrudan karşılanır (örn. "… reklam verme nasıl" → metinde "nasıl yapılır" geçsin).
 """.strip()
+
 
 def _human_template() -> str:
     return """
@@ -68,19 +72,20 @@ Eski Skor: {eski_skor}
 
 Beklenen çıktı (JSON):
 {
-  "Kullanıcı Niyeti": "{kullanici_niyeti}",
-  "Mevcut İçerik": "{mevcut_icerik}",
-  "Geliştirilmiş İçerik": "Buraya geliştirilmiş hali gelecek",
-  "HTML Bölümü": "{html_bolumu}"
+    "Kullanıcı Niyeti": "{kullanici_niyeti}",
+    "Mevcut İçerik": "{mevcut_icerik}",
+    "Geliştirilmiş İçerik": "Buraya geliştirilmiş hali gelecek",
+    "HTML Bölümü": "{html_bolumu}"
 }
 
 Sadece bu JSON'u döndür; başka açıklama ekleme.
 """.strip()
 
+
 def _build_prompt(kullanici_niyeti: str, mevcut_icerik: str, html_bolumu: str, eski_skor):
     prompt = ChatPromptTemplate.from_messages([
         ("system", _system_template()),
-        ("human",  _human_template()),
+        ("human", _human_template()),
     ])
     return prompt.format(
         kullanici_niyeti=kullanici_niyeti,
@@ -88,6 +93,7 @@ def _build_prompt(kullanici_niyeti: str, mevcut_icerik: str, html_bolumu: str, e
         html_bolumu=html_bolumu,
         eski_skor=eski_skor if eski_skor is not None else 0.0
     )
+
 
 # --- Dışa açık API ---
 def generate_prompts_for_intent(intent: str, topk: int = 10) -> list[dict]:
@@ -127,6 +133,7 @@ def generate_prompts_for_intent(intent: str, topk: int = 10) -> list[dict]:
             }
         })
     return out
+
 
 def generate_niyet_prompt() -> str:
     """

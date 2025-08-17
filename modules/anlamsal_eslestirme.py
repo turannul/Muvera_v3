@@ -11,10 +11,12 @@ from modules.kullanici_sorgusu import sorgular
 # Türkçe için cümle ayırıcı
 splitter = SentenceSplitter(language='tr')
 
+
 def cumlelere_bol(metin):
     if not isinstance(metin, str):
         return []
     return splitter.split(metin)
+
 
 # ✅ 1. Anlamsal eşleştirme (tek eşleşme)
 def anlamsal_eslestirme(content):
@@ -49,6 +51,7 @@ def anlamsal_eslestirme(content):
     sonuc_df = pd.DataFrame(results)
     return sonuc_df
 
+
 # ✅ 2. Tüm sorgulara göre içerik eşleşmeleri
 def tam_sorgu_uyum_tablosu(content, sorgular: list):
     print("🔍 Sorgular ile cümle cümle eşleşme başlatıldı...")
@@ -82,6 +85,7 @@ def tam_sorgu_uyum_tablosu(content, sorgular: list):
     df = pd.DataFrame(result_rows)
     return df
 
+
 def tam_niyet_uyum_tablosu(content, niyet_listesi: list):
     print("🔍 Niyetler ile cümle cümle eşleşme başlatıldı...")
 
@@ -113,6 +117,7 @@ def tam_niyet_uyum_tablosu(content, niyet_listesi: list):
 
     df = pd.DataFrame(result_rows)
     return df
+
 
 # ✅ 4. Başlık ve açıklama ile sorguların anlamsal uyumu
 def title_description_uyumu(content: dict, sorgular: list) -> pd.DataFrame:

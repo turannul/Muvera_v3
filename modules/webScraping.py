@@ -14,6 +14,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+
 def get_structured_web_content_selenium(url: str) -> dict:
     logging.info(f"URL açılıyor: {url}")
 
@@ -62,8 +63,8 @@ def get_structured_web_content_selenium(url: str) -> dict:
         meta = driver.find_element(By.XPATH, "//meta[@name='description']")
         result["meta_description"] = meta.get_attribute("content")
         logging.info(f"Meta description bulundu: {result['meta_description'][:80]}...")
-    except:
-        logging.warning("Meta description bulunamadı.")
+    except Exception as e:
+        logging.warning(f"Meta description bulunamadı: {e}")
 
     # Listeler
     for tag in ["ul", "ol"]:

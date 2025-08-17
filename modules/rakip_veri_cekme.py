@@ -3,7 +3,7 @@ import time
 
 import openpyxl
 import pandas as pd
-from serpapi import GoogleSearch  # Doğru import
+from serpapi import GoogleSearch
 
 # =============== AYARLAR ===============
 API_KEY = "26cb0c0c44cbb5ef59f4a9daadd6d9169243c1c8efccca9121020f2e09003447"  # API anahtarınızı buraya yazın
@@ -14,6 +14,7 @@ SAYFA_SAYISI = 3  # İlk 3 sayfa (30 sonuç)
 SORGU_LIMITI = 5  # Kaç sorguyu analiz edeceğiz
 # =======================================
 
+
 # Domain'i URL'den ayıkla
 def domain_ayikla(url):
     # URL'den domain'i çıkarmak için düzenli ifade
@@ -22,6 +23,7 @@ def domain_ayikla(url):
     if match:
         return match.group(1)
     return url
+
 
 # Excel'den kendi domain URL'sini al
 def kendi_domaini_al(dosya_adi, sayfa_adi):
@@ -32,6 +34,7 @@ def kendi_domaini_al(dosya_adi, sayfa_adi):
     except Exception as e:
         print(f"Domain bilgisi alınırken hata oluştu: {e}")
         return None
+
 
 # Excel'den en popüler sorguları al
 def en_populer_sorgulari_al(dosya_yolu, limit):
@@ -46,12 +49,13 @@ def en_populer_sorgulari_al(dosya_yolu, limit):
         print(f"Sorgular alınırken hata oluştu: {e}")
         return []
 
+
 # Google sonuçlarını çek - TEK SEFERDE TÜM SONUÇLARI ALIR
 def google_sonuclari_cek(sorgu, num_pages=3):
     try:
         # Her sayfada 10 sonuç olduğu için toplam sonuç sayısı = num_pages * 10
         toplam_sonuc = num_pages * 10
-        
+
         params = {
             "q": sorgu,
             "location": "Turkey",  # Türkiye'den arama yapmak için
@@ -60,20 +64,21 @@ def google_sonuclari_cek(sorgu, num_pages=3):
             "num": toplam_sonuc,  # Tek seferde tüm sonuçları al
             "api_key": API_KEY
         }
-        
+
         search = GoogleSearch(params)
         results = search.get_dict()
         organic_results = results.get("organic_results", [])
-        
+
         # Eğer istenilen sayıda sonuç gelmediyse, ek sorgu yap
         if len(organic_results) < toplam_sonuc:
             print(f"Uyarı: İstenen {toplam_sonuc} sonuç yerine {len(organic_results)} sonuç alındı.")
-        
+
         time.sleep(1)  # API hız sınırlamasına karşı
         return organic_results
     except Exception as e:
         print(f"Google sonuçları çekilirken hata oluştu: {e}")
         return []
+
 
 # Kendi sitemizin üstündekileri filtrele
 def ust_siteleri_al(sonuclar, kendi_domain):
@@ -91,6 +96,7 @@ def ust_siteleri_al(sonuclar, kendi_domain):
         ust_siteler = sonuclar[:pozisyon]
     return ust_siteler
 
+
 # Ana işlem
 def main():
     # Kendi domain URL'sini Excel'den al
@@ -98,19 +104,19 @@ def main():
     if not KENDI_SITE:
         print("Kendi site URL'si alınamadı. Lütfen Excel dosyasını kontrol edin.")
         return
-    
+
     print(f"Kullanılan site URL'si: {KENDI_SITE}")
-    
+
     sorgular = en_populer_sorgulari_al(EXCEL_DOSYA_YOLU, SORGU_LIMITI)
     if not sorgular:
         print("Sorgular alınamadı. Lütfen Excel dosyasını kontrol edin.")
         return
-        
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Ust Siteler"
     ws.append(["Sorgu", "Pozisyon", "Başlık", "URL", "Açıklama"])
-    
+
     for sorgu in sorgular:
         print(f"[+] Sorgulanıyor: {sorgu}")
         try:
@@ -118,9 +124,9 @@ def main():
             if not tum_sonuc:
                 print(f"'{sorgu}' için sonuç alınamadı")
                 continue
-                
+
             ust_siteler = ust_siteleri_al(tum_sonuc, KENDI_SITE)
-            
+
             for i, site in enumerate(ust_siteler):
                 ws.append([
                     sorgu,
@@ -132,12 +138,13 @@ def main():
         except Exception as e:
             print(f"'{sorgu}' işlenirken hata oluştu: {e}")
             continue
-    
+
     try:
         wb.save(EXCEL_CIKTI_YOLU)
         print("✅ Tüm sorgular işlendi. Sonuçlar:", EXCEL_CIKTI_YOLU)
     except Exception as e:
         print(f"Excel dosyası kaydedilirken hata oluştu: {e}")
+
 
 if __name__ == "__main__":
     main()

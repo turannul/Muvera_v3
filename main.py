@@ -18,6 +18,7 @@ def temizle_niyet(text: str) -> str:
     text = text.replace('"', '').replace("'", '')
     return text
 
+
 # ---- 1) URL ----
 url = "https://www.reklamvermek.com"  # isterseniz değiştirin
 if not url.startswith(("http://", "https://")):
@@ -83,5 +84,3 @@ if (f"{output_dir}/icerik_niyet_top{TOP_K}.csv"):
     from modules.niyet import sort_intent_similarity
     sort_intent_similarity()
     print(f"✅ {OUT_CSV} yazıldı.")
-
-
