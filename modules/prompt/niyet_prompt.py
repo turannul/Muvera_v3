@@ -125,7 +125,7 @@ def generate_prompts_for_intent(intent: str, topk: int = 10) -> list[dict]:
         })
     return out
 
-def generate_niyet_prompt_first() -> str:
+def generate_niyet_prompt() -> str:
     """
         Eski akışla uyum için: CSV'nin ilk satırı baz alınarak TEK prompt döndürür.
     """
