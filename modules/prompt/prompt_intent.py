@@ -2,51 +2,48 @@ from __future__ import annotations
 import os
 import pandas as pd
 from config import output_dir
-from .prompt_shared import build_prompt, _cols
+from .prompt_helpers import build_prompt, _cols
 
-
-SORGU_TOP10 = os.path.join(output_dir, "icerik_sorgu_top10.csv")
+NIYET_TOP10 = os.path.join(output_dir, "icerik_niyet_top10.csv")
 
 
 def _read_top10() -> pd.DataFrame:
-    if not os.path.exists(SORGU_TOP10):
-        raise FileNotFoundError(f"[HATA] Sorgu verisi bulunamadı: {SORGU_TOP10}")
-    df = pd.read_csv(SORGU_TOP10)
+    if not os.path.exists(NIYET_TOP10):
+        raise FileNotFoundError(f"[HATA] Niyet verisi bulunamadı: {NIYET_TOP10}")
+    df = pd.read_csv(NIYET_TOP10)
     if df.shape[1] < 4:
-        raise ValueError("En az 4 kolon bekleniyordu: Sorgu, HTML, İçerik, Skor")
+        raise ValueError("En az 4 kolon bekleniyordu: Niyet, HTML, İçerik, Skor")
     return df
 
 
 def _system_template() -> str:
     return """
-        Sen bir SEO ve içerik geliştirme uzmanısın.
-        Görevin, kullanıcı sorgusuna göre mevcut metni küçük dokunuşlarla iyileştirmektir.
+Sen bir SEO ve içerik geliştirme uzmanısın.
+Görevin, kullanıcı niyetine (intent) göre mevcut metni küçük dokunuşlarla iyileştirmektir.
 
-        Kurallar:
-        1) Benzerlik skorunu artırmaya odaklan, anlamı bozma.
-        2) Metin türüne göre:
-            - h1/h2: Kullanıcı sorgusundan DOĞRUDAN başlık üret (örn: "google reklam verme" → "Google Reklam Verme Nasıl Yapılır?").
-            - p/div: Mevcut metni KORU, sadece sorguyu karşılayacak şekilde en fazla 5–10 kelime ekle.
-            - li: Mevcut metni KORU, en fazla 1–2 kelime ekle.
-        3) Uzunluk sınırları:
-            - p/div: +5–10 kelime
-            - li: +1–2 kelime
-            - h1/h2: “Nasıl Yapılır?” / “Kılavuzu” varsa kesme.
-        4) Her zaman değiştir. Aynen geri döndürmek YASAK.
-        5) Reklam/CTA dili kullanma.
-        6) Cevap **yalnızca geçerli JSON** olmalı.
-        7) Kullanıcı sorgusundaki anahtar kelimeleri mutlaka geçirmelisin.
-    """.strip()
+Kurallar:
+1) Benzerlik skorunu artırmaya odaklan, anlamı bozma.
+2) HTML bölümüne göre:
+    - h1/h2: niyeti doğrudan karşılayan başlık üret (örn: "... nasıl" → "… Nasıl Yapılır?").
+    - p/div: Mevcut metni KORU, en fazla 5–10 kelime ekle.
+    - li: Mevcut metni KORU, en fazla 1–2 kelime ekle.
+3) Uzunluk sınırları: p/div 5–10 kelime; li 1–2 kelime; h1/h2 kesme/özetleme yapma.
+4) Her zaman değiştir; rollback yok.
+5) Pazarlama/CTA klişeleri yok ("hedef kitlenize ulaşın", "kampanyanızı oluşturun" vb.).
+6) Cevap DAİMA geçerli JSON olmalı.
+7) Mevcut metin korunur; sadece küçük ekleme yapılır (kısaltma/özetleme YOK).
+8) Niyet doğrudan karşılanır (örn. "… reklam verme nasıl" → metinde "nasıl yapılır" geçsin).
+""".strip()
 
 
-def generate_prompts_for_sorgu(sorgu: str, topk: int = 10) -> list[dict]:
+def generate_prompts_for_intent(intent: str, topk: int = 10) -> list[dict]:
     """
-    Seçilen 'sorgu' için ilk topk satırın LLM prompt'larını döndürür.
+    Seçilen 'intent' için ilk topk satırın LLM prompt'larını döndürür.
     Dönen her eleman: { "prompt": str, "row": {...} }
     """
     df = _read_top10()
     cols = _cols(df)
-    mask = df[cols["query"]].astype(str).str.strip() == str(sorgu).strip()
+    mask = df[cols["query"]].astype(str).str.strip() == str(intent).strip()
     sub = df.loc[mask].copy()
     if sub.empty:
         return []
@@ -79,7 +76,7 @@ def generate_prompts_for_sorgu(sorgu: str, topk: int = 10) -> list[dict]:
     return out
 
 
-def generate_sorgu_prompt() -> str:
+def generate_niyet_prompt() -> str:
     """
         Eski akışla uyum için: CSV'nin ilk satırı baz alınarak TEK prompt döndürür.
     """

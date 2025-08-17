@@ -1,11 +1,10 @@
 # modules/niyet.py (veya verdiğin dosyada aynen değiştir)
 import pandas as pd
 
-from config import output_dir
+from config import html_icerik_niyet_uyumu_output, icerik_niyet_top_output, TOP_K_NIYET
 
-IN_CSV = f"{output_dir}/html_icerik_niyet_uyumu.csv"
-TOP_K = 10
-OUT_CSV = f"{output_dir}/icerik_niyet_top{TOP_K}.csv"
+IN_CSV = html_icerik_niyet_uyumu_output
+OUT_CSV = icerik_niyet_top_output
 
 
 def sort_intent_similarity(dedup_within_intent: bool = True):
@@ -39,7 +38,7 @@ def sort_intent_similarity(dedup_within_intent: bool = True):
     out = (
         df.sort_values(["Kullanıcı Niyeti", "_score_num"], ascending=[True, False])
         .groupby("Kullanıcı Niyeti", group_keys=True)
-        .head(TOP_K)
+        .head(TOP_K_NIYET)
         .reset_index(drop=True)
     )
 

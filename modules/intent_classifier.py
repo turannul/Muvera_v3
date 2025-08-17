@@ -3,7 +3,7 @@
 import pandas as pd
 from ollama import Client
 
-from config import ollama_client, output_dir
+from config import ollama_client, sorgu_niyet_tema_output
 from modules.kullanici_sorgusu import sorgular
 
 
@@ -28,4 +28,4 @@ if __name__ == "__main__":
         n = niyet_belirle(s)
         print(f"{s} → {n}")
         sonuclar.append({"Sorgu": s, "Kısa Niyet Teması": n})
-    pd.DataFrame(sonuclar).to_csv(f"{output_dir}/sorgu_niyet_tema.csv", index=False)
+    pd.DataFrame(sonuclar).to_csv(sorgu_niyet_tema_output, index=False)

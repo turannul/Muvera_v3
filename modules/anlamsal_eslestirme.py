@@ -5,7 +5,13 @@ import torch
 from sentence_splitter import SentenceSplitter
 from sentence_transformers import util
 
-from config import model
+from config import (
+    model,
+    html_icerik_niyet_uyumu_output,
+    html_icerik_sorgu_uyumu_output,
+    title_desc_uyum_output,
+    title_desc_kendi_uyum_output,
+)
 from modules.kullanici_sorgusu import sorgular
 
 # Türkçe için cümle ayırıcı
@@ -83,6 +89,8 @@ def tam_sorgu_uyum_tablosu(content, sorgular: list):
             })
 
     df = pd.DataFrame(result_rows)
+    df.to_csv(html_icerik_sorgu_uyumu_output, index=False)
+    print("✅ html_icerik_sorgu_uyumu.csv yazıldı.")
     return df
 
 
@@ -116,6 +124,8 @@ def tam_niyet_uyum_tablosu(content, niyet_listesi: list):
             })
 
     df = pd.DataFrame(result_rows)
+    df.to_csv(html_icerik_niyet_uyumu_output, index=False)
+    print("✅ html_icerik_niyet_uyumu.csv yazıldı.")
     return df
 
 
@@ -142,7 +152,10 @@ def title_description_uyumu(content: dict, sorgular: list) -> pd.DataFrame:
                 "Benzerlik Skoru": round(skor, 4)
             })
 
-    return pd.DataFrame(sonuc)
+    df = pd.DataFrame(sonuc)
+    df.to_csv(title_desc_uyum_output, index=False)
+    print("✅ title_description_uyum.csv yazıldı.")
+    return df
 
 
 # ✅ Başlık ve açıklama arasında benzerlik skoru hesaplayan fonksiyon
@@ -161,8 +174,11 @@ def title_description_birbirine_uyum(content: dict) -> pd.DataFrame:
     desc_vec = model.encode(description, convert_to_tensor=True)
     skor = util.cos_sim(title_vec, desc_vec)[0][0].item()
 
-    return pd.DataFrame([{
+    df = pd.DataFrame([{
         "title": title,
         "meta_description": description,
         "Benzerlik Skoru": round(skor, 4),
     }])
+    df.to_csv(title_desc_kendi_uyum_output, index=False)
+    print("✅ title_description_kendi_uyumu.csv yazıldı.")
+    return df

@@ -15,13 +15,12 @@ from lxml import html as lxml_html
 from playwright.sync_api import sync_playwright
 from sentence_transformers import SentenceTransformer, util
 
-# ------------------- Konfig / yollar -------------------
-try:
-    from config import output_dir as _cfg_output_dir
-except Exception:
-    _cfg_output_dir = None
-output_dir = _cfg_output_dir or os.path.join("data", "output")
-os.makedirs(output_dir, exist_ok=True)
+from config import (
+    output_dir,
+    json_output_dir,
+    sonuclar_input,
+    html_icerik_sorgu_uyumu_output,
+)
 
 try:
     from playwright_stealth import stealth_sync
@@ -29,17 +28,8 @@ except Exception:
     def stealth_sync(page):
         return None
 
-
-# input_dir
-try:
-    from config import input_dir as _cfg_input_dir
-except Exception:
-    _cfg_input_dir = None
-input_dir = _cfg_input_dir or os.path.join("data", "input")
-os.makedirs(input_dir, exist_ok=True)
-
 # Excel varsayılanı: data/input/sonuclar.xlsx
-DEFAULT_EXCEL = os.path.join(input_dir, "sonuclar.xlsx")
+DEFAULT_EXCEL = sonuclar_input
 
 # ------------------- Semantik model -------------------
 ST_MODEL_NAME = os.getenv("ST_MODEL_NAME", "emrecan/bert-base-turkish-cased-mean-nli-stsb-tr")
@@ -538,7 +528,7 @@ def main():
     global SEM_THRESHOLD
 
     ap = argparse.ArgumentParser(description="Rakip Analiz — sorgu-merkezli (interactive query, no 'uyum_durumu')")
-    ap.add_argument("--glob", default=f"{output_dir}/html_icerik_sorgu_uyumu.csv", help="CSV yolu/deseni. Vars: output_dir/html_icerik_sorgu_uyumu.csv")
+    ap.add_argument("--glob", default=html_icerik_sorgu_uyumu_output, help="CSV yolu/deseni. Vars: output_dir/html_icerik_sorgu_uyumu.csv")
     ap.add_argument("--query", default=None, help="Hedef sorgu. Vermezsen terminalden sorulur.")
     ap.add_argument("--excel", default=None, help=f"SERP Excel yolu (vars: {DEFAULT_EXCEL})")
     ap.add_argument("--threshold", type=float, default=0.50, help="Snippet/meta eşiği (0-1). Vars: 0.50")
@@ -578,7 +568,7 @@ def main():
     }
 
     # 7) Kaydet
-    out_dir = Path(output_dir) / "json"
+    out_dir = Path(json_output_dir)
     out_dir.mkdir(exist_ok=True, parents=True)
     json_path = out_dir / f"analiz_{slugify(selected)}.json"
     with open(json_path, "w", encoding="utf-8") as f:

@@ -1,33 +1,20 @@
 from __future__ import annotations
-from prompt.niyet_prompt import generate_niyet_prompt as _gen_niyet_prompt
-from prompt.sorgu_prompt import generate_sorgu_prompt as _gen_sorgu_prompt
 import os, json, re, time
 import pandas as pd
 from ollama import chat
 from sentence_transformers import SentenceTransformer, util
 
-# ============== CONFIG (edit here) ==============
-OLLAMA_MODEL = "gemma3:4b"
-# ===============================================
+from modules.prompt.prompt_intent import generate_niyet_prompt as _gen_niyet_prompt
+from modules.prompt.prompt_query import generate_sorgu_prompt as _gen_sorgu_prompt
 
-# ---- paths ----
-try:
-    from config import output_dir as _OUT
-except Exception:
-    _OUT = os.path.join("data", "output")
-os.makedirs(_OUT, exist_ok=True)
-
-NIYET_IN_CSV = os.path.join(_OUT, "icerik_niyet_top10.csv")
-SORGU_IN_CSV = os.path.join(_OUT, "icerik_sorgu_top10.csv")
-NIYET_OUT_CSV = os.path.join(_OUT, "icerik_niyet_iyilestirme.csv")
-SORGU_OUT_CSV = os.path.join(_OUT, "icerik_sorgu_iyilestirme.csv")
-
-# ---- model ----
-try:
-    from config import model as _cfg_model  # instance or callable
-    st_model = _cfg_model() if callable(_cfg_model) else _cfg_model
-except Exception:
-    st_model = SentenceTransformer("emrecan/bert-base-turkish-cased-mean-nli-stsb-tr")
+from config import (
+    icerik_niyet_top10_output as NIYET_IN_CSV,
+    icerik_sorgu_top10_output as SORGU_IN_CSV,
+    icerik_niyet_iyilestirme_output as NIYET_OUT_CSV,
+    icerik_sorgu_iyilestirme_output as SORGU_OUT_CSV,
+    model as st_model,
+    ollama_model as ollama_model
+)
 
 
 # ============== UTIL ==============
@@ -129,7 +116,7 @@ def build_sorgu_prompt(query, current, tag, old):
             return _gen_sorgu_prompt(query, current, tag, old)
         except Exception:
             pass
-    return build_niyet_prompt(query, current, tag, old)\
+    return build_niyet_prompt(query, current, tag, old)
         .replace("Kullanıcı Niyeti", "Kullanıcı Sorgusu")
         .replace("Geliştirilmiş İçerik", "Geliştirilmiş Metin")
 
@@ -144,14 +131,16 @@ def try_improve(mode, query_text, current_text, html_tag, old_score, min_improve
         prompt = build_niyet_prompt(query_text, best_text, html_tag, best_score) if mode == "niyet" else build_sorgu_prompt(query_text, best_text, html_tag, best_score)
         data = parse_llm_json(run_llm(prompt))
 
-        cand = (data.get("Geliştirilmiş İçerik") if mode == "niyet"
-                else data.get("Geliştirilmiş Metin"))
+        cand = (
+                data.get("Geliştirilmiş İçerik") if mode == "niyet"
+                else data.get("Geliştirilmiş Metin")
+        )
         if not isinstance(cand, str) or not cand.strip():
             print("    ↪️  LLM returned empty candidate; keeping current text", flush=True)
             cand = best_text
 
         new_score = similarity(query_text, cand)
-        print(f"[{now()}] scored new={new_score:.4f} (delta={(new_score - best_score):+.4f})", flush=True)
+        print(f"[{now()}] scored new={new_score:.4f} (delta={{(new_score - best_score):+.4f}})", flush=True)
 
         if new_score >= best_score * (1.0 + min_improve):
             print(f"🎯 improved ≥ {min_improve * 100:.3f}% — accepting", flush=True)

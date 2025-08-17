@@ -4,12 +4,13 @@ import time
 import openpyxl
 import pandas as pd
 from serpapi import GoogleSearch
+from config import bir_hafta_input, sonuclar_input, SERPAPI_API_KEY
 
 # =============== AYARLAR ===============
-API_KEY = "26cb0c0c44cbb5ef59f4a9daadd6d9169243c1c8efccca9121020f2e09003447"  # API anahtarınızı buraya yazın
+API_KEY = SERPAPI_API_KEY
 DOMAIN_BILGI_SAYFASI = "Sayfa sayısı"  # Domain bilgisinin bulunduğu sayfa adı
-EXCEL_DOSYA_YOLU = "data/input/1hafta.xlsx"
-EXCEL_CIKTI_YOLU = "data/output/sonuclar.xlsx"
+EXCEL_DOSYA_YOLU = bir_hafta_input
+EXCEL_CIKTI_YOLU = sonuclar_input
 SAYFA_SAYISI = 3  # İlk 3 sayfa (30 sonuç)
 SORGU_LIMITI = 5  # Kaç sorguyu analiz edeceğiz
 # =======================================

@@ -1,10 +1,10 @@
 import pandas as pd
 
-from config import input_dir
+from config import bir_hafta_input, uc_ay_input
 
 # Excel dosyasını oku
-df = pd.read_excel(f"{input_dir}/1hafta.xlsx")
-month3 = pd.read_excel(f"{input_dir}/3ay.xlsx")
+df = pd.read_excel(bir_hafta_input)
+month3 = pd.read_excel(uc_ay_input)
 
 # Boş olan sorguları ayıkla
 df = df.dropna(subset=["En çok yapılan sorgular"])

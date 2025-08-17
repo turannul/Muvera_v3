@@ -5,11 +5,10 @@ import unicodedata
 
 import pandas as pd
 
-from config import output_dir
+from config import output_dir, html_icerik_sorgu_uyumu_output, icerik_sorgu_top_output, TOP_K_SORGU
 
-TOP_K = 10
-IN_CSV = f"{output_dir}/html_icerik_sorgu_uyumu.csv"
-OUT_CSV = f"{output_dir}/icerik_sorgu_top{TOP_K}.csv"
+IN_CSV = html_icerik_sorgu_uyumu_output
+OUT_CSV = icerik_sorgu_top_output
 
 
 # ---------- Yardımcılar ----------
@@ -92,7 +91,7 @@ def sort_query_similarity():
     topk = (
         df.sort_values([col_sorgu, "_score_num"], ascending=[True, False])
         .groupby(col_sorgu, group_keys=True)
-        .head(TOP_K)
+        .head(TOP_K_SORGU)
         .reset_index(drop=True)
     )
 
