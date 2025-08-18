@@ -106,7 +106,7 @@ def sort_query_similarity():
 
     os.makedirs(output_dir, exist_ok=True)
     out.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
-    print(f"✅ {OUT_CSV} yazıldı")
+    print(f"✅ {icerik_sorgu_top_output} yazıldı.")
 
 
 # Script olarak çağrılırsa üret

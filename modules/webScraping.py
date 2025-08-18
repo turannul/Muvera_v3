@@ -1,29 +1,22 @@
-import logging
 import time
 from urllib.parse import urljoin, urlparse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# LOGGING AYARI
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
-
 
 def get_structured_web_content_selenium(url: str) -> dict:
-    logging.info(f"URL açılıyor: {url}")
+    print(f"URL açılıyor: {url}")
 
     options = Options()
+    options.binary_location = "/usr/sbin/chromium-browser"
     options.add_argument("--headless")  # Arka planda çalıştır
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    options.add_argument("--disable-gpu")  # No GPU
+    options.add_argument("--no-sandbox")   # No Sandbox
+    # ! Install driver via package manager
+    driver = webdriver.Chrome(options=options)
     driver.get(url)
     time.sleep(3)
 
@@ -32,7 +25,7 @@ def get_structured_web_content_selenium(url: str) -> dict:
     def get_elements_text(by_tag):
         elements = driver.find_elements(By.TAG_NAME, by_tag)
         texts = [el.text.strip() for el in elements if el.text.strip()]
-        logging.info(f"<{by_tag}> etiketlerinden {len(texts)} adet içerik bulundu.")
+        print(f"<{by_tag}> etiketlerinden {len(texts)} adet içerik bulundu.")
         return texts
 
     result = {
@@ -62,9 +55,9 @@ def get_structured_web_content_selenium(url: str) -> dict:
     try:
         meta = driver.find_element(By.XPATH, "//meta[@name='description']")
         result["meta_description"] = meta.get_attribute("content")
-        logging.info(f"Meta description bulundu: {result['meta_description'][:80]}...")
+        print(f"Meta description bulundu: {result['meta_description'][:80]}...")
     except Exception as e:
-        logging.warning(f"Meta description bulunamadı: {e}")
+        print(f"Meta description bulunamadı: {e}")
 
     # Listeler
     for tag in ["ul", "ol"]:
@@ -76,7 +69,7 @@ def get_structured_web_content_selenium(url: str) -> dict:
                 if text:
                     result["lists"].append(text)
                     count += 1
-        logging.info(f"<{tag}> listelerinden toplam {count} madde bulundu.")
+        print(f"<{tag}> listelerinden toplam {count} madde bulundu.")
 
     # Tablolar
     tables = driver.find_elements(By.TAG_NAME, "table")
@@ -84,7 +77,7 @@ def get_structured_web_content_selenium(url: str) -> dict:
         content = table.text.strip()
         if content:
             result["tables"].append(content)
-    logging.info(f"{len(tables)} adet <table> bulundu, {len(result['tables'])} tanesi dolu.")
+    print(f"{len(tables)} adet <table> bulundu, {len(result['tables'])} tanesi dolu.")
 
     # Görsel alt metinleri
     imgs = driver.find_elements(By.TAG_NAME, "img")
@@ -94,7 +87,7 @@ def get_structured_web_content_selenium(url: str) -> dict:
         if alt:
             result["images_alt"].append(alt.strip())
             alt_count += 1
-    logging.info(f"{alt_count} adet <img alt='...'> bulundu.")
+    print(f"{alt_count} adet <img alt='...'> bulundu.")
 
     # Linkler (internal vs external)
     internal_count, external_count = 0, 0
@@ -110,13 +103,8 @@ def get_structured_web_content_selenium(url: str) -> dict:
             else:
                 result["links"]["external"].append(link_info)
                 external_count += 1
-    logging.info(f"{internal_count} iç link, {external_count} dış link bulundu.")
+    print(f"{internal_count} iç link, {external_count} dış link bulundu.")
 
     driver.quit()
-    logging.info("Tarama tamamlandı.")
+    print("Tarama tamamlandı.")
     return result
-
-# Örnek kullanım:
-# url = "https://www.ornekwebsitesi.com"
-# data = get_structured_web_content_selenium(url)
-# from pprint import pprint; pprint(data)
