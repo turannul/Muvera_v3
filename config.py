@@ -41,3 +41,6 @@ ollama_model = "gemma3:4b"
 
 # API Keys
 SERPAPI_API_KEY = "26cb0c0c44cbb5ef59f4a9daadd6d9169243c1c8efccca9121020f2e09003447"
+
+
+url: str = "reklamvermek.com"

@@ -1,32 +1,25 @@
-import time
+import os, urllib, aiohttp, asyncio
 from urllib.parse import urljoin, urlparse
-
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
+# todo: implement caching in data/input/url
 
 
-def get_structured_web_content_selenium(url: str) -> dict:
-    print(f"URL açılıyor: {url}")
+async def get_structured_web_content_selenium(url: str) -> dict:
+    url = await _add_url_scheme(url)
+    driver = await init_driver()
 
-    options = Options()
-    options.binary_location = "/usr/sbin/chromium-browser"
-    options.add_argument("--headless")  # Arka planda çalıştır
-    options.add_argument("--disable-gpu")  # No GPU
-    options.add_argument("--no-sandbox")   # No Sandbox
-    # ! Install driver via package manager
-    driver = webdriver.Chrome(options=options)
-    driver.get(url)
-    time.sleep(3)
+    await asyncio.to_thread(driver.get, url)
+    await asyncio.sleep(3)
 
     domain = urlparse(url).netloc
 
     def get_elements_text(by_tag):
         elements = driver.find_elements(By.TAG_NAME, by_tag)
-        texts = [el.text.strip() for el in elements if el.text.strip()]
-        print(f"<{by_tag}> etiketlerinden {len(texts)} adet içerik bulundu.")
-        return texts
+        return [el.text.strip() for el in elements if el.text.strip()]
 
     result = {
         "title": driver.title,
@@ -51,46 +44,27 @@ def get_structured_web_content_selenium(url: str) -> dict:
         }
     }
 
-    # Meta description
-    try:
-        meta = driver.find_element(By.XPATH, "//meta[@name='description']")
-        result["meta_description"] = meta.get_attribute("content")
-        print(f"Meta description bulundu: {result['meta_description'][:80]}...")
-    except Exception as e:
-        print(f"Meta description bulunamadı: {e}")
+    meta = driver.find_element(By.XPATH, "//meta[@name='description']")
+    result["meta_description"] = meta.get_attribute("content")
 
-    # Listeler
     for tag in ["ul", "ol"]:
-        count = 0
         for el in driver.find_elements(By.TAG_NAME, tag):
             lis = el.find_elements(By.TAG_NAME, "li")
             for li in lis:
                 text = li.text.strip()
                 if text:
                     result["lists"].append(text)
-                    count += 1
-        print(f"<{tag}> listelerinden toplam {count} madde bulundu.")
 
-    # Tablolar
-    tables = driver.find_elements(By.TAG_NAME, "table")
-    for table in tables:
+    for table in driver.find_elements(By.TAG_NAME, "table"):
         content = table.text.strip()
         if content:
             result["tables"].append(content)
-    print(f"{len(tables)} adet <table> bulundu, {len(result['tables'])} tanesi dolu.")
 
-    # Görsel alt metinleri
-    imgs = driver.find_elements(By.TAG_NAME, "img")
-    alt_count = 0
-    for img in imgs:
+    for img in driver.find_elements(By.TAG_NAME, "img"):
         alt = img.get_attribute("alt")
         if alt:
             result["images_alt"].append(alt.strip())
-            alt_count += 1
-    print(f"{alt_count} adet <img alt='...'> bulundu.")
 
-    # Linkler (internal vs external)
-    internal_count, external_count = 0, 0
     for a in driver.find_elements(By.TAG_NAME, "a"):
         href = a.get_attribute("href")
         text = a.text.strip()
@@ -99,12 +73,73 @@ def get_structured_web_content_selenium(url: str) -> dict:
             link_info = {"text": text, "url": full_url}
             if domain in urlparse(full_url).netloc:
                 result["links"]["internal"].append(link_info)
-                internal_count += 1
             else:
                 result["links"]["external"].append(link_info)
-                external_count += 1
-    print(f"{internal_count} iç link, {external_count} dış link bulundu.")
 
     driver.quit()
-    print("Tarama tamamlandı.")
+    print("Tarama tamamlandi")
     return result
+
+
+# Check HTTPS support
+async def _check_https(url: str) -> bool:
+    parsed_url = urllib.parse.urlparse(url)
+    https_url = parsed_url._replace(scheme="https").geturl()
+    timeout = aiohttp.ClientTimeout(total=5)
+
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            try:
+                async with session.head(https_url, allow_redirects=True) as response:
+                    return response.status < 400
+            except aiohttp.ClientResponseError as e:
+                if e.status == 405:
+                    async with session.get(https_url, allow_redirects=True) as response:
+                        return response.status < 400
+                return False
+    except (aiohttp.ClientError, asyncio.TimeoutError):
+        return False
+
+
+# Add scheme (http/https) if missing
+async def _add_url_scheme(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme in ("http", "https"):
+        return url
+    test_https_url = "https://" + url
+    return test_https_url if await _check_https(test_https_url) else "http://" + url
+
+
+# Driver fallback
+async def init_driver():
+    try:
+        return await init_chromium_driver()
+    except Exception as e:
+        print(f"Chromium driver failed: {e}")
+        return await init_gecko_driver()
+
+
+# Chrome Driver
+async def init_chromium_driver():
+    chromedriver_path = os.popen("which chromedriver").read().strip()
+    if not chromedriver_path:
+        raise Exception("chromedriver not found")
+
+    options = ChromeOptions()
+    options.binary_location = chromedriver_path
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    return webdriver.Chrome(options=options)
+
+
+# Firefox Driver
+async def init_gecko_driver():
+    geckodriver_path = os.popen("which geckodriver").read().strip()
+    if not geckodriver_path:
+        raise Exception("geckodriver not found")
+
+    options = FirefoxOptions()
+    options.add_argument("--headless")
+    service = FirefoxService(executable_path=geckodriver_path)
+    return webdriver.Firefox(service=service, options=options)
