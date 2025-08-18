@@ -118,19 +118,25 @@ async def _add_url_scheme(url: str) -> str:
 
 async def init_driver():
     try:
+        print("Using Firefox/Gecko driver")
+        return await init_gecko_driver()
+
+    except Exception as firefox_err:
+        print(f"Firefox got an error: {firefox_err}")
+        print("Using Chrome/Chromium driver")
         try:
             return await init_chromium_driver()
         except Exception as chromium_err:
             print(f"Chromium got error: {chromium_err}")
+            raise RuntimeError(
+                "Both Firefox and Chromium failed:"
+                f"\nFirefox error: {firefox_err}"
+                f"\nChromium error: {chromium_err}"
+            )
 
-        try:
-            return await init_gecko_driver()
-        except Exception as firefox_err:
-            print(f"Firefox got an error: {firefox_err}")
+    finally:
+        print("Drivers initialized.")
 
-    except Exception as driver_err:
-        print("Driver failure cannot continue.")
-        raise RuntimeError(driver_err)
 
 
 async def init_chromium_driver():
