@@ -15,6 +15,7 @@ COLUMN_MAP = {
     "score": ["Benzerlik Skoru", "Skor", "Score", "Similarity Score", "similarity_score"]
 }
 
+
 def _cols(df: pd.DataFrame):
     # Eski tasarıma sadık: ilk 4 sütun
     c1, c2, c3, c4 = df.columns[:4]

@@ -1,6 +1,5 @@
 import aiohttp
 import asyncio
-import os
 import urllib
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromiumOptions
@@ -129,10 +128,9 @@ async def init_driver():
         except Exception as firefox_err:
             print(f"Firefox got an error: {firefox_err}")
 
-
     except Exception as driver_err:
         print("Driver failure cannot continue.")
-        raise RuntimeError("Driver failure cannot continue.")
+        raise RuntimeError(driver_err)
 
 
 async def init_chromium_driver():
@@ -141,10 +139,9 @@ async def init_chromium_driver():
     options.add_argument("--headless=new")
     return driver
 
+
 async def init_gecko_driver():
     options = FirefoxOptions()
     options.add_argument("--headless")
     driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
     return driver
-# Message: Expected browser binary location, but unable to find binary in default location, no 'moz:firefoxOptions.binary' capability provided, and no binary flag set on the command line; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
-

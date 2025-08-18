@@ -11,6 +11,7 @@ MAX_ATTEMPTS = 3                   # try up to N; if not improved, add anyway wi
 ONLY_IMPROVED = False              # do NOT skip non-improved rows
 # ===============================================
 
+
 def run_niyet_flow(min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS, only_improved=ONLY_IMPROVED) -> str:
     t_flow = time.time()
     df = read_csv_robust(NIYET_IN_CSV)
@@ -53,9 +54,9 @@ def run_niyet_flow(min_improve=MIN_IMPROVE, max_attempts=MAX_ATTEMPTS, only_impr
             "Yeni Skor": round(float(new), 6),
             "Yüzde Değişim": round(float(change_pct), 2),
         })
-        msg = "✅ kept (Δ=+{:.2f}%)”.format(change_pct) if improved_flag else "✅ kept (no improvement; Δ=0.00%)"
-        print(f"   {msg}", flush=True)
-        print(f"   ⏱ row time: {fmt_sec(time.time() - r_t0)}", flush=True)
+    msg = "✅ kept (Δ=+{:.2f}%)".format(change_pct) if improved_flag else "✅ kept (no improvement; Δ=0.00%)"
+    print(f"   {msg}", flush=True)
+    print(f"   ⏱ row time: {fmt_sec(time.time() - r_t0)}", flush=True)
 
     out_df = pd.DataFrame(rows)
     out_df.to_csv(NIYET_OUT_CSV, index=False, encoding="utf-8")

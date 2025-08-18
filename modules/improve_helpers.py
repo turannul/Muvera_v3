@@ -10,7 +10,7 @@ from config import icerik_niyet_top10_output as NIYET_IN_CSV
 from config import icerik_sorgu_iyilestirme_output as SORGU_OUT_CSV
 from config import icerik_sorgu_top10_output as SORGU_IN_CSV
 from config import model as st_model
-from config import ollama_model as ollama_model
+from config import ollama_model as OLLAMA_MODEL  # Fix: ensure OLLAMA_MODEL is imported correctly
 from modules.prompt.prompt_intent import generate_niyet_prompt as _gen_niyet_prompt
 from modules.prompt.prompt_query import generate_sorgu_prompt as _gen_sorgu_prompt
 from ollama import chat
@@ -99,8 +99,24 @@ NIYET_SYS = (
     "Görevin, kullanıcı niyetine göre mevcut metni küçük dokunuşlarla iyileştirmek. "
     "h1/h2: niyeti doğrudan karşılayan başlık; p/div: +5–10 kelime; li: +1–2 kelime. "
     "Anlamı bozma, pazarlama klişeleri ekleme. Sadece geçerli JSON döndür."
-)
-NIYET_HUM = '''.strip()
+).strip()
+
+NIYET_HUM = """
+    Girdi:
+    Kullanıcı Niyeti: {intent}
+    Mevcut İçerik: {current}
+    HTML Bölümü: {tag}
+    Eski Skor: {old}
+
+    Beklenen çıktı (JSON):
+    {{
+        "Kullanıcı Niyeti": "{intent}",
+        "Mevcut İçerik": "{current}",
+        "Geliştirilmiş İçerik": "Buraya geliştirilmiş hali gelecek",
+        "HTML Bölümü": "{tag}"
+    }}
+""".strip()
+
 
 def build_niyet_prompt(intent, current, tag, old):
     if _gen_niyet_prompt:
@@ -110,15 +126,16 @@ def build_niyet_prompt(intent, current, tag, old):
             pass
     return f"{NIYET_SYS}\n{NIYET_HUM}".format(intent=intent, current=current, tag=tag, old=old)
 
+
 def build_sorgu_prompt(query, current, tag, old):
     if _gen_sorgu_prompt:
         try:
             return _gen_sorgu_prompt(query, current, tag, old)
         except Exception:
             pass
-    return build_niyet_prompt(query, current, tag, old)
-        .replace("Kullanıcı Niyeti", "Kullanıcı Sorgusu")
-        .replace("Geliştirilmiş İçerik", "Geliştirilmiş Metin")
+    return (build_niyet_prompt(query, current, tag, old)
+            .replace("Kullanıcı Niyeti", "Kullanıcı Sorgusu")
+            .replace("Geliştirilmiş İçerik", "Geliştirilmiş Metin"))
 
 
 # ---- core improve ----
@@ -132,8 +149,8 @@ def try_improve(mode, query_text, current_text, html_tag, old_score, min_improve
         data = parse_llm_json(run_llm(prompt))
 
         cand = (
-                data.get("Geliştirilmiş İçerik") if mode == "niyet"
-                else data.get("Geliştirilmiş Metin")
+            data.get("Geliştirilmiş İçerik") if mode == "niyet"
+            else data.get("Geliştirilmiş Metin")
         )
         if not isinstance(cand, str) or not cand.strip():
             print("    ↪️  LLM returned empty candidate; keeping current text", flush=True)
