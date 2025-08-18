@@ -5,22 +5,15 @@ import argparse
 import glob
 import json
 import os
+import pandas as pd
 import re
 import sys
 import unicodedata
-from pathlib import Path
-
-import pandas as pd
+from config import html_icerik_sorgu_uyumu_output, json_output_dir, output_dir, sonuclar_input
 from lxml import html as lxml_html
+from pathlib import Path
 from playwright.sync_api import sync_playwright
 from sentence_transformers import SentenceTransformer, util
-
-from config import (
-    output_dir,
-    json_output_dir,
-    sonuclar_input,
-    html_icerik_sorgu_uyumu_output,
-)
 
 try:
     from playwright_stealth import stealth_sync

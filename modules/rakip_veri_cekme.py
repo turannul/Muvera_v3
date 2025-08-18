@@ -1,10 +1,9 @@
-import re
-import time
-
 import openpyxl
 import pandas as pd
+import re
+import time
+from config import SERPAPI_API_KEY, bir_hafta_input, sonuclar_input
 from serpapi import GoogleSearch
-from config import bir_hafta_input, sonuclar_input, SERPAPI_API_KEY
 
 # =============== AYARLAR ===============
 API_KEY = SERPAPI_API_KEY

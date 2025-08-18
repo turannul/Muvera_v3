@@ -1,7 +1,6 @@
 # modules/intent_classifier.py (öneri)
 
 import pandas
-
 from config import ollama_client, sorgu_niyet_tema_output
 from modules.kullanici_sorgusu import sorgular
 

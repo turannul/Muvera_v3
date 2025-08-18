@@ -1,18 +1,10 @@
-from itertools import chain
-
 import pandas as pd
 import torch
+from config import html_icerik_niyet_uyumu_output, html_icerik_sorgu_uyumu_output, model, title_desc_kendi_uyum_output, title_desc_uyum_output
+from itertools import chain
+from modules.kullanici_sorgusu import sorgular
 from sentence_splitter import SentenceSplitter
 from sentence_transformers import util
-
-from config import (
-    model,
-    html_icerik_niyet_uyumu_output,
-    html_icerik_sorgu_uyumu_output,
-    title_desc_uyum_output,
-    title_desc_kendi_uyum_output,
-)
-from modules.kullanici_sorgusu import sorgular
 
 # Türkçe için cümle ayırıcı
 splitter = SentenceSplitter(language='tr')

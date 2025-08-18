@@ -1,11 +1,9 @@
 # modules/sorgu.py
 import os
+import pandas as pd
 import re
 import unicodedata
-
-import pandas as pd
-
-from config import output_dir, html_icerik_sorgu_uyumu_output, icerik_sorgu_top_output, TOP_K_SORGU
+from config import TOP_K_SORGU, html_icerik_sorgu_uyumu_output, icerik_sorgu_top_output, output_dir
 
 IN_CSV = html_icerik_sorgu_uyumu_output
 OUT_CSV = icerik_sorgu_top_output

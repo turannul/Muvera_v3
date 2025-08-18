@@ -1,10 +1,17 @@
-import os, urllib, aiohttp, asyncio
-from urllib.parse import urljoin, urlparse
+import aiohttp
+import asyncio
+import os
+import urllib
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromiumOptions
+from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.common.by import By
+from urllib.parse import urljoin, urlparse
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
+from webdriver_manager.firefox import GeckoDriverManager
 # todo: implement caching in data/input/url
 
 
@@ -110,36 +117,34 @@ async def _add_url_scheme(url: str) -> str:
     return test_https_url if await _check_https(test_https_url) else "http://" + url
 
 
-# Driver fallback
 async def init_driver():
     try:
-        return await init_chromium_driver()
-    except Exception as e:
-        print(f"Chromium driver failed: {e}")
-        return await init_gecko_driver()
+        try:
+            return await init_chromium_driver()
+        except Exception as chromium_err:
+            print(f"Chromium got error: {chromium_err}")
+
+        try:
+            return await init_gecko_driver()
+        except Exception as firefox_err:
+            print(f"Firefox got an error: {firefox_err}")
 
 
-# Chrome Driver
+    except Exception as driver_err:
+        print("Driver failure cannot continue.")
+        raise RuntimeError("Driver failure cannot continue.")
+
+
 async def init_chromium_driver():
-    chromedriver_path = os.popen("which chromedriver").read().strip()
-    if not chromedriver_path:
-        raise Exception("chromedriver not found")
+    driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()))
+    options = ChromiumOptions()
+    options.add_argument("--headless=new")
+    return driver
 
-    options = ChromeOptions()
-    options.binary_location = chromedriver_path
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    return webdriver.Chrome(options=options)
-
-
-# Firefox Driver
 async def init_gecko_driver():
-    geckodriver_path = os.popen("which geckodriver").read().strip()
-    if not geckodriver_path:
-        raise Exception("geckodriver not found")
-
     options = FirefoxOptions()
     options.add_argument("--headless")
-    service = FirefoxService(executable_path=geckodriver_path)
-    return webdriver.Firefox(service=service, options=options)
+    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
+    return driver
+# Message: Expected browser binary location, but unable to find binary in default location, no 'moz:firefoxOptions.binary' capability provided, and no binary flag set on the command line; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+

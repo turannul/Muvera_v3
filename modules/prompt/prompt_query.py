@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 import os
 import pandas as pd
+from .prompt_helpers import _cols, build_prompt
 from config import output_dir
-from .prompt_helpers import build_prompt, _cols
-
 
 SORGU_TOP10 = os.path.join(output_dir, "icerik_sorgu_top10.csv")
 

@@ -1,6 +1,5 @@
-import os
-
 import ollama
+import os
 from sentence_transformers import SentenceTransformer
 
 # Directories

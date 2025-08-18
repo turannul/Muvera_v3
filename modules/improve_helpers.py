@@ -1,20 +1,20 @@
 from __future__ import annotations
-import os, json, re, time
-import pandas as pd
-from ollama import chat
-from sentence_transformers import SentenceTransformer, util
 
+import json
+import os
+import pandas as pd
+import re
+import time
+from config import icerik_niyet_iyilestirme_output as NIYET_OUT_CSV
+from config import icerik_niyet_top10_output as NIYET_IN_CSV
+from config import icerik_sorgu_iyilestirme_output as SORGU_OUT_CSV
+from config import icerik_sorgu_top10_output as SORGU_IN_CSV
+from config import model as st_model
+from config import ollama_model as ollama_model
 from modules.prompt.prompt_intent import generate_niyet_prompt as _gen_niyet_prompt
 from modules.prompt.prompt_query import generate_sorgu_prompt as _gen_sorgu_prompt
-
-from config import (
-    icerik_niyet_top10_output as NIYET_IN_CSV,
-    icerik_sorgu_top10_output as SORGU_IN_CSV,
-    icerik_niyet_iyilestirme_output as NIYET_OUT_CSV,
-    icerik_sorgu_iyilestirme_output as SORGU_OUT_CSV,
-    model as st_model,
-    ollama_model as ollama_model
-)
+from ollama import chat
+from sentence_transformers import SentenceTransformer, util
 
 
 # ============== UTIL ==============

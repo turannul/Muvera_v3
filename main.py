@@ -1,25 +1,12 @@
-import os, time, asyncio
-
-from config import (
-    html_icerik_niyet_uyumu_output,
-    html_icerik_sorgu_uyumu_output,
-    title_desc_uyum_output,
-    title_desc_kendi_uyum_output,
-    icerik_sorgu_top_output,
-    icerik_niyet_top_output,
-    url
-)
-from modules.anlamsal_eslestirme import (
-    anlamsal_eslestirme,
-    tam_niyet_uyum_tablosu,
-    tam_sorgu_uyum_tablosu,
-    title_description_birbirine_uyum,
-    title_description_uyumu,
-)
+import asyncio
+import os
+import time
+from config import html_icerik_niyet_uyumu_output, html_icerik_sorgu_uyumu_output, icerik_niyet_top_output, icerik_sorgu_top_output, title_desc_kendi_uyum_output, title_desc_uyum_output, url
+from modules.anlamsal_eslestirme import anlamsal_eslestirme, tam_niyet_uyum_tablosu, tam_sorgu_uyum_tablosu, title_description_birbirine_uyum, title_description_uyumu
 from modules.intent_classifier import main as niyet_belirle
 from modules.kullanici_sorgusu import sorgular
-from modules.sorgu import sort_query_similarity
 from modules.niyet import sort_intent_similarity
+from modules.sorgu import sort_query_similarity
 from modules.webScraping import get_structured_web_content_selenium
 
 

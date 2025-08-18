@@ -1,5 +1,4 @@
 import pandas as pd
-
 from config import bir_hafta_input, uc_ay_input
 
 # Excel dosyasını oku

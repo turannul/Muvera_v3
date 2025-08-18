@@ -1,7 +1,6 @@
 # modules/niyet.py (veya verdiğin dosyada aynen değiştir)
 import pandas
-
-from config import html_icerik_niyet_uyumu_output, icerik_niyet_top_output, TOP_K_NIYET
+from config import TOP_K_NIYET, html_icerik_niyet_uyumu_output, icerik_niyet_top_output
 
 IN_CSV = html_icerik_niyet_uyumu_output
 OUT_CSV = icerik_niyet_top_output
